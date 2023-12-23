@@ -1,17 +1,16 @@
-from app.schemas.base import _BaseModel, BaseReturnSchema
 from pydantic import BaseModel
+
+from app.schemas.base import _BaseModel, BaseReturnSchema
 
 
 class UserSchema(_BaseModel):
     id: int
     username: str
-    email: str
     password: str
 
 
 class UserCreateSchema(BaseModel):
     username: str
-    email: str
     password: str
 
 

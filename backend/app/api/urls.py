@@ -1,5 +1,10 @@
 API = "/api/"
 
+CREATE = "/create/"
+LIST = "/list/"
+EDIT = "/edit/"
+DELETE = "/delete/"
+
 
 class UserURLS:
     user = "user"
@@ -23,28 +28,50 @@ class DeskURLS:
     base_url = f"{API}{desk}"
 
     # POST
-    create_desk = "/create_desk/"
-    create_desk_url = f"{base_url}{create_desk}"
+    create = CREATE
+    create_url = f"{base_url}{create}"
     # GET
-    get_desk_list = "/get_desk_list/"
-    get_desk_list_url = f"{base_url}{get_desk_list}"
+    list = LIST
+    list_url = f"{base_url}{list}"
     # PATCH
-    edit_desk = "/edit_desk/"
-    edit_desk_url = f"{base_url}{edit_desk}"
+    edit = EDIT
+    edit_url = f"{base_url}{edit}"
     # DELETE
-    delete_desk = "/delete_desk/"
-    delete_desk_url = f"{base_url}{delete_desk}"
+    delete = DELETE
+    delete_url = f"{base_url}{delete}"
 
-    # POST
-    create_type = "/create_type/"
-    create_type_url = f"{base_url}{create_type}"
-    # GET
-    get_task_type_list = "/get_task_type_list/"
-    get_task_type_list_url = f"{base_url}{get_task_type_list}"
 
+class TaskTypeURLS:
+    task_type = "task_type"
+    base_url = f"{API}{task_type}"
     # POST
-    create_task = "/create_task/"
-    create_task_url = f"{base_url}{create_task}"
+    create = CREATE
+    create_url = f"{base_url}{create}"
     # GET
-    get_task_list = "/get_task_list/"
-    get_task_list_url = f"{base_url}{get_task_list}"
+    list = LIST
+    list_url = f"{base_url}{list}"
+    # PATCH
+    edit = EDIT + "{task_type_id}/"
+    edit_url = f"{base_url}{edit}"
+    # DELETE
+    delete = DELETE + "{task_type_id}/"
+    delete_url = f"{base_url}{delete}"
+
+
+class TaskURLS:
+    task = "task"
+    base_url = f"{API}{task}"
+    # POST
+    create = CREATE
+    create_url = f"{base_url}{create}"
+    # GET
+    list = LIST
+    list_url = f"{base_url}{list}"
+    # PATCH
+    edit = EDIT + "{task_id}/"
+    edit_url = f"{base_url}{edit}"
+    # DELETE
+    delete = DELETE + "{task_id}/"
+    delete_url = f"{base_url}{delete}"
+
+
