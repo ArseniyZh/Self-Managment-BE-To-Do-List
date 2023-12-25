@@ -1,4 +1,4 @@
-alembic==1.12.1
+alembic>=1.0,<1.12.1
 annotated-types==0.6.0
 anyio==3.7.1
 async-timeout==4.0.3
