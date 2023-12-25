@@ -1,14 +1,15 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routers import router as api_router
 from app.db.base import Base
-from app.db.session import engine
+from app.db.session import async_engine
 
 app = FastAPI()
 
 app.include_router(api_router)
-
 
 origins = [
     "http://localhost",
@@ -23,13 +24,13 @@ app.add_middleware(
 )
 
 
-def init():
-    Base.metadata.create_all(bind=engine)
+async def init():
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-
-init()
 
 if __name__ == "__main__":
+    asyncio.get_event_loop().run_until_complete(init())
     import uvicorn
 
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)

@@ -1,16 +1,14 @@
 import typing
 
 from fastapi import Depends
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, select, delete
 from sqlalchemy.orm import Session, relationship, joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import Base
 from app.db.session import get_db
 from app.schemas.base import Schema
-from app.schemas.desk_schemas import (
-    DeskSchema,
-    CreateDeskSchema,
-)
+from app.schemas.desk_schemas import DeskSchema, CreateDeskSchema
 
 
 class Desk(Base):
@@ -24,51 +22,56 @@ class Desk(Base):
     tasks_types = relationship("TaskType", back_populates="desk")
 
 
-def create_desk_model(user_id: int, title: str, db: Session = Depends(get_db)) -> Desk:
+async def create_desk_model(user_id: int, title: str, db: AsyncSession = Depends(get_db)) -> Desk:
     db_desk = Desk(title=title, user_id=user_id)
     db.add(db_desk)
-    db.commit()
-    db.refresh(db_desk)
+    await db.commit()
+    await db.refresh(db_desk)
 
     return db_desk
 
 
-def get_desk_models_list_by_user_id(user_id: int, db: Session = Depends(get_db)) -> typing.List[DeskSchema]:
-    db_desk_list = db.query(Desk).filter(Desk.user_id == user_id).order_by(Desk.created_at)
+async def get_desk_models_list_by_user_id(user_id: int, db: AsyncSession = Depends(get_db)) -> typing.List[DeskSchema]:
+    query = select(Desk).filter(Desk.user_id == user_id).order_by(Desk.created_at)
+    result = await db.execute(query)
+    db_desk_list = result.fetchall()
+
     result_list = [
-        get_desk_schema(desk) for desk in db_desk_list
+        await get_desk_schema(desk["Desk"]) for desk in db_desk_list
     ]
+
     return result_list
 
 
-def get_desk_model_by_id(desk_id: int, db: Session = Depends(get_db)) -> Desk:
-    db_desk = db.query(Desk).filter(Desk.id == desk_id).first()
+async def get_desk_model_by_id(desk_id: int, db: AsyncSession = Depends(get_db)) -> Desk:
+    query = select(Desk).filter(Desk.id == desk_id)
+    result = await db.execute(query)
+    db_desk = result.scalar()
     return db_desk
 
 
-def edit_desk_model(desk_id: int, data: CreateDeskSchema, db: Session = Depends(get_db)) -> None:
-    db_desk = db.query(Desk).filter(Desk.id == desk_id).first()
+async def edit_desk_model(desk_id: int, data: CreateDeskSchema, db: AsyncSession = Depends(get_db)) -> None:
+    query = select(Desk).filter(Desk.id == desk_id)
+    result = await db.execute(query)
+    db_desk = result.scalar()
     if db_desk:
         db_desk.title = data.title
-        db.commit()
+        await db.commit()
+        await db.refresh(db_desk)
     return
 
 
-def delete_desk_model_by_id(desk_id: int, db: Session = Depends(get_db)) -> None:
-    from app.models.task_models import Task
-    db.query(Task).filter(desk_id == desk_id).delete()
-    db.query(Desk).filter(Desk.id == desk_id).delete()
-    db.commit()
+async def delete_desk_model_by_id(desk_id: int, db: AsyncSession = Depends(get_db)) -> None:
+    query = delete(Desk).filter(Desk.id == desk_id)
+    await db.execute(query)
+    await db.commit()
     return
 
 
-def check_belong_desk_to_user(desk_id: int, user_id: int, db: Session = Depends(get_db)) -> bool:
-    db_desk = get_desk_model_by_id(desk_id, db)
-
-    if db_desk and db_desk.user.id == user_id:
-        return True
-    return False
+async def check_belong_desk_to_user(desk_id: int, user_id: int, db: AsyncSession = Depends(get_db)) -> bool:
+    db_desk = await get_desk_model_by_id(desk_id, db)
+    return db_desk and db_desk.user.id == user_id
 
 
-def get_desk_schema(desk: Desk) -> DeskSchema:
+async def get_desk_schema(desk: Desk) -> DeskSchema:
     return Schema(DeskSchema, desk)

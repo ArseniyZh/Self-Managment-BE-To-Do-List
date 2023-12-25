@@ -1,8 +1,9 @@
 from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.desk_models import Desk, create_desk_model
 from app.models.task_type_models import TaskType, create_task_type_model
-from app.models.task_models import Task, create_task_model
+from app.models.task_models import create_task_model
 
 from app.schemas.task_type_schemas import CreateTaskTypeSchema
 from app.schemas.task_schemas import CreateTaskSchema
@@ -10,7 +11,7 @@ from app.schemas.task_schemas import CreateTaskSchema
 from app.db.session import get_db
 
 
-def create_preload_data(user_id: int, db: Depends(get_db)) -> None:
+async def create_preload_data(user_id: int, db: AsyncSession = Depends(get_db)) -> None:
     title = "title"
     color = "color"
 
@@ -47,22 +48,21 @@ def create_preload_data(user_id: int, db: Depends(get_db)) -> None:
         },
     }
 
-    def create(_type: str) -> None:
+    async def create(_type: str) -> None:
         _desk = desk_data.get(_type)
-        db_desk: Desk = create_desk_model(user_id, _desk.get(title), db)
+        db_desk: Desk = await create_desk_model(user_id, _desk.get(title), db)
+        desk_id = db_desk.id
 
         for task_type in task_type_data:
-            _desk["desk_id"] = db_desk.id
-            db_task_type: TaskType = create_task_type_model(
-                CreateTaskTypeSchema(desk_id=db_desk.id, **task_type), db
+            _desk["desk_id"] = desk_id
+            db_task_type: TaskType = await create_task_type_model(
+                CreateTaskTypeSchema(desk_id=desk_id, **task_type), db
             )
             for task in task_data.get(_type).get(task_type.get(title)):
                 task["type_id"] = db_task_type.id
-                db_task: Task = create_task_model(
+                await create_task_model(
                     CreateTaskSchema(**task), db
                 )
-        return
 
-    create(home)
-    create(work)
+    await create(home)
     return

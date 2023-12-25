@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: toDoList
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    expose:
+      - "5432"
+    networks:
+      - backend
+
+  fastapi_app:
+    build:
+      context: ./backend/
+      dockerfile: ./Dockerfile
+    container_name: fastapi_app
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+
+networks:
+  backend:

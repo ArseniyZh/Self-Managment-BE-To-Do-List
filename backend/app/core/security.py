@@ -1,18 +1,15 @@
 import datetime
 
 import jwt
-
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import (
-    SECRET_KEY,
-    ALGORITHM
-)
+from app.core.config import SECRET_KEY, ALGORITHM
 from app.db.session import get_db
 from app.models.user_models import User, get_user_model_by_username
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -21,7 +18,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def create_access_token(data: dict) -> str:
+async def create_access_token(data: dict) -> str:
     """
     Функция создания токена
     """
@@ -32,8 +29,8 @@ def create_access_token(data: dict) -> str:
     return encoded_jwt
 
 
-def get_current_user(
-        authorization: str = Header(...), db: Session = Depends(get_db)
+async def get_current_user(
+    authorization: str = Header(...), db: AsyncSession = Depends(get_db)
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,7 +53,7 @@ def get_current_user(
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         raise credentials_exception
 
-    db_user: User = get_user_model_by_username(username, db)
+    db_user: User = await get_user_model_by_username(username, db)
 
     if db_user is None:
         raise credentials_exception

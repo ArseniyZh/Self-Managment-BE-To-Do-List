@@ -63,13 +63,13 @@ class DeskPermissions(Permissions):
     @staticmethod
     def desk_belong_to_user(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs):
             _class = DeskPermissions(func, *args, **kwargs)
 
             user_id = _class.current_user.id
-            if not check_belong_desk_to_user(desk_id=_class.desk_id, user_id=user_id, db=_class.db):
+            if not await check_belong_desk_to_user(desk_id=_class.desk_id, user_id=user_id, db=_class.db):
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=_class.desk_not_belong_to_user_text)
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
 
         return wrapper
 
@@ -80,13 +80,13 @@ class TaskPermissions(Permissions):
     @staticmethod
     def task_belong_to_user(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs):
             _class = TaskPermissions(func, *args, **kwargs)
 
             user_id = _class.current_user.id
-            if not check_belong_task_to_user(_class.task_id, user_id, _class.db):
+            if not await check_belong_task_to_user(_class.task_id, user_id, _class.db):
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=_class.task_not_belong_to_user_text)
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
 
         return wrapper
 
@@ -97,14 +97,14 @@ class TaskTypePermissions(Permissions):
     @staticmethod
     def task_type_belong_to_user(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs):
             _class = TaskTypePermissions(func, *args, **kwargs)
 
             user_id = _class.current_user.id
-            if not check_belong_task_type_to_user(_class.task_type_id, user_id, _class.db):
+            if not await check_belong_task_type_to_user(_class.task_type_id, user_id, _class.db):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN, detail=_class.task_type_not_belong_to_user_text
                 )
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
 
         return wrapper

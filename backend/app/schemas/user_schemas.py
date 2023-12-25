@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.schemas.base import _BaseModel, BaseReturnSchema
+from app.schemas.base import _BaseModel
 
 
 class UserSchema(_BaseModel):
