@@ -3,8 +3,8 @@ import typing
 from fastapi import Depends, APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.urls import DeskURLS
 from app.api.permissions import DeskPermissions
+from app.api.urls import DeskURLS
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.desk_models import (
@@ -17,7 +17,6 @@ from app.models.desk_models import (
 )
 from app.models.user_models import User
 from app.schemas.desk_schemas import CreateDeskSchema, DeskSchema
-
 
 router = APIRouter()
 

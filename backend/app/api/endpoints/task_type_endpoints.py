@@ -7,7 +7,6 @@ from app.api.permissions import DeskPermissions, TaskTypePermissions
 from app.api.urls import TaskTypeURLS
 from app.core.security import get_current_user
 from app.db.session import get_db
-from app.models.user_models import User
 from app.models.task_type_models import (
     TaskType,
     create_task_type_model,
@@ -16,12 +15,12 @@ from app.models.task_type_models import (
     delete_task_type_model,
     get_task_type_schema,
 )
+from app.models.user_models import User
 from app.schemas.task_type_schemas import (
     CreateTaskTypeSchema,
     EditTaskTypeSchema,
     TaskTypeSchema,
 )
-
 
 router = APIRouter()
 

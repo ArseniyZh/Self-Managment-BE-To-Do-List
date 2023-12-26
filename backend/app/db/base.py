@@ -9,9 +9,9 @@ class Base:
     updated_at: DateTime
 
     @declared_attr
-    def created_at(cls):
+    def created_at(self):
         return Column(DateTime(timezone=True), server_default=func.now())
 
     @declared_attr
-    def updated_at(cls):
+    def updated_at(self):
         return Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

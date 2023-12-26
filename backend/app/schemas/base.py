@@ -1,16 +1,11 @@
-import typing
 from datetime import datetime
+
 from pydantic import BaseModel
 
 
 class _BaseModel(BaseModel):
     created_at: datetime
     updated_at: datetime
-
-
-class BaseReturnSchema(BaseModel):
-    message: str
-    data: typing.Any
 
 
 class Schema:
@@ -26,7 +21,7 @@ class Schema:
         schema = schema if schema else kwargs.get("schema")
         obj = obj if obj else kwargs.get("obj")
 
-        if not schema and not obj:
+        if (not schema and not obj) or (obj == schema):
             raise AttributeError("Необходимо передать схему и объект")
 
         properties_keys = schema.schema().get("properties").keys()

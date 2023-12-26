@@ -1,9 +1,9 @@
 import typing
 
 from fastapi import Depends
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, select, delete
-from sqlalchemy.orm import Session, relationship, joinedload
+from sqlalchemy import Column, Integer, String, ForeignKey, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 from app.db.session import get_db

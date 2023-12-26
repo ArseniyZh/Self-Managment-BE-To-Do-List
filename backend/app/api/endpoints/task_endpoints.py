@@ -18,7 +18,6 @@ from app.models.task_models import (
 from app.models.user_models import User
 from app.schemas.task_schemas import CreateTaskSchema, EditTaskSchema, TaskSchema
 
-
 router = APIRouter()
 
 
@@ -70,4 +69,3 @@ async def task_delete_endpoint(
     """
     await delete_task_model(task_id, db)
     return {}
-

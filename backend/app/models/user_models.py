@@ -1,8 +1,8 @@
 from fastapi import Depends
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 from app.db.session import get_db
@@ -30,8 +30,8 @@ async def create_user_model(username: str, password: str, db: AsyncSession = Dep
 
 
 async def get_user_model_by_username(username: str, db: AsyncSession = Depends(get_db)) -> User:
-    result = await db.execute(select(User).filter(User.username == username))
-    return result.scalar_one_or_none()
+    query = select(User).filter(User.username == username)
+    return (await db.execute(query)).scalar()
 
 
 async def get_user_schema(user: User) -> UserSchema:

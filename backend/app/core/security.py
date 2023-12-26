@@ -10,7 +10,6 @@ from app.core.config import SECRET_KEY, ALGORITHM
 from app.db.session import get_db
 from app.models.user_models import User, get_user_model_by_username
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -30,7 +29,7 @@ async def create_access_token(data: dict) -> str:
 
 
 async def get_current_user(
-    authorization: str = Header(...), db: AsyncSession = Depends(get_db)
+        authorization: str = Header(...), db: AsyncSession = Depends(get_db)
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

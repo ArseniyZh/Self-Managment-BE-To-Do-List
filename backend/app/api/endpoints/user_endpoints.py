@@ -1,14 +1,14 @@
+import asyncio
+
 from fastapi import Depends, HTTPException, APIRouter, status
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from app.api.urls import UserURLS
 from app.core.security import get_current_user, pwd_context, create_access_token
 from app.db.session import get_db
 from app.models.user_models import User, create_user_model, get_user_model_by_username, get_user_schema
 from app.schemas.user_schemas import UserCreateSchema, UserLoginSchema, UserSchema, TokenSchema
-from app.utils.user_utils import create_preload_data
-
 
 router = APIRouter()
 
@@ -30,9 +30,6 @@ async def user_register(user: UserCreateSchema, db: AsyncSession = Depends(get_d
     if not user:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Произошла неизвестная ошибка")
     access_token = await create_access_token(data={"sub": username})
-
-    # Создаем начальные данные для использования
-    await create_preload_data(user.id, db)
 
     return_data = TokenSchema(
         token=access_token,
@@ -58,7 +55,7 @@ async def user_login(user: UserLoginSchema, db: Session = Depends(get_db)) -> To
 
         return return_data
 
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверные данные")
 
 
 @router.get(UserURLS.user_data, status_code=status.HTTP_200_OK)

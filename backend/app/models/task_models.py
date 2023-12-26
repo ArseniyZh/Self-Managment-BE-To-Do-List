@@ -2,9 +2,9 @@ import typing
 from datetime import datetime
 
 from fastapi import Depends
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, exists
-from sqlalchemy.orm import Session, relationship, joinedload, selectinload
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, exists
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import relationship, selectinload
 from sqlalchemy.sql import select, delete
 
 from app.db.base import Base
@@ -25,10 +25,7 @@ class Task(Base):
     type = relationship("TaskType", back_populates="tasks")
 
 
-async def create_task_model(
-        data: CreateTaskSchema,
-        db: AsyncSession = Depends(get_db)
-) -> Task:
+async def create_task_model(data: CreateTaskSchema, db: AsyncSession = Depends(get_db)) -> Task:
     db_task = Task(**data.dict())
     db.add(db_task)
     await db.commit()
@@ -64,7 +61,6 @@ async def edit_task_model(task_id: int, data: EditTaskSchema, db: AsyncSession =
         db_task.description = data.description if data.description else db_task.description
         db_task.date_to = data.date_to if data.date_to else db_task.date_to
         await db.commit()
-        db.expire(db_task)
         await db.refresh(db_task)
 
     return
@@ -93,8 +89,7 @@ async def get_task_model_by_id(task_id: int, db: AsyncSession = Depends(get_db))
         .filter(Task.id == task_id)
     )
 
-    result = await db.execute(query)
-    return result.scalar()
+    return (await db.execute(query)).scalar()
 
 
 async def check_belong_task_to_user(task_id: int, user_id: int, db: AsyncSession = Depends(get_db)) -> bool:

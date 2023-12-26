@@ -1,10 +1,8 @@
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import DATABASE_URL, TEST, TEST_DATABASE_URL
-
 
 db_url = TEST_DATABASE_URL if TEST else DATABASE_URL
 

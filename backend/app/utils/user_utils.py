@@ -1,14 +1,12 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.desk_models import Desk, create_desk_model
-from app.models.task_type_models import TaskType, create_task_type_model
-from app.models.task_models import create_task_model
-
-from app.schemas.task_type_schemas import CreateTaskTypeSchema
-from app.schemas.task_schemas import CreateTaskSchema
-
 from app.db.session import get_db
+from app.models.desk_models import Desk, create_desk_model
+from app.models.task_models import create_task_model
+from app.models.task_type_models import TaskType, create_task_type_model
+from app.schemas.task_schemas import CreateTaskSchema
+from app.schemas.task_type_schemas import CreateTaskTypeSchema
 
 
 async def create_preload_data(user_id: int, db: AsyncSession = Depends(get_db)) -> None:

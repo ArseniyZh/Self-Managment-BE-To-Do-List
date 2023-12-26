@@ -1,9 +1,9 @@
 import typing
 
 from fastapi import Depends
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, exists
-from sqlalchemy.orm import Session, relationship, joinedload, selectinload
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, exists
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import relationship, selectinload
 from sqlalchemy.sql import select, delete
 
 from app.db.base import Base
@@ -26,16 +26,11 @@ class TaskType(Base):
     tasks = relationship("Task", back_populates="type")
 
 
-async def create_task_type_model(
-        data: CreateTaskTypeSchema, db: AsyncSession = Depends(get_db)
-) -> TaskType:
+async def create_task_type_model(data: CreateTaskTypeSchema, db: AsyncSession = Depends(get_db)) -> TaskType:
     query = select(TaskType).filter(TaskType.desk_id == data.desk_id).order_by(-TaskType.sequence)
-    result = await db.execute(query)
+    result = (await db.execute(query)).scalar()
 
-    sequence = 0
-    if result := result.scalar():
-        sequence = result.sequence + 1
-    data.sequence = sequence
+    data.sequence = result.sequence + 1 if result else 0
 
     db_task_type = TaskType(**data.dict())
     db.add(db_task_type)
