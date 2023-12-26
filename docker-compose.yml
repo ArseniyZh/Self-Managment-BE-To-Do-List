@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: toDoList
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
+    depends_on:
+      - fastapi_app
     expose:
       - "5432"
     networks:
@@ -18,8 +20,6 @@ services:
       context: ./backend/
       dockerfile: ./Dockerfile
     container_name: fastapi_app
-    depends_on:
-      - postgres
     ports:
       - "8000:8000"
     networks:
