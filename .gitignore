@@ -6,3 +6,4 @@
 *.idea
 *.pyc
 /backend/tests/
+.env

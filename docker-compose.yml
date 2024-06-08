@@ -3,27 +3,40 @@ version: '3.8'
 services:
   postgres:
     image: postgres:latest
-    container_name: postgres
+    container_name: todo-postgres
+    env_file: .env
     environment:
-      POSTGRES_DB: toDoList
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: $DB_NAME
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASSWORD
     depends_on:
       - fastapi_app
-    expose:
-      - "5432"
+    ports:
+      - "$DB_PORT:5432"
     networks:
-      - backend
+      - sm-backend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
 
   fastapi_app:
     build:
       context: ./backend/
       dockerfile: ./Dockerfile
+    env_file: .env
     container_name: fastapi_app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend/:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8000:8000"
     networks:
-      - backend
+      - sm-backend
+
+volumes:
+  postgres_data:
+  logs:
 
 networks:
-  backend:
+  sm-backend:
+    external: true
