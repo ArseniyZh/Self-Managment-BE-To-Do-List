@@ -12,24 +12,32 @@ from app.models.user_models import User, get_user_model_by_username
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_DAYS = 3000
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def create_access_token(data: dict) -> str:
+async def create_access_token(user) -> str:
     """
     Функция создания токена
     """
-    to_encode = data.copy()
-    expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+    expire = datetime.datetime.utcnow() + datetime.timedelta(
+        days=ACCESS_TOKEN_EXPIRE_DAYS
+    )
+    to_encode = {
+        "sub": user.username,
+        "id": user.id,
+        "user_id": user.id,
+        "exp": expire,
+        "token_type": "access",
+    }
+
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
 async def get_current_user(
-        authorization: str = Header(...), db: AsyncSession = Depends(get_db)
+    authorization: str = Header(...), db: AsyncSession = Depends(get_db)
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

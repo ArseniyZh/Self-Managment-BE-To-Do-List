@@ -37,7 +37,7 @@ async def create_preload_data(user_id: int, db: AsyncSession = Depends(get_db)) 
         home: {
             to_do: [{title: "Посидеть с детьми"}],
             in_progress: [{title: "Помыть посуду"}],
-            done: [{title: "Прибраться"}]
+            done: [{title: "Прибраться"}],
         },
         work: {
             to_do: [{title: "Завершить сделку"}],
@@ -58,9 +58,7 @@ async def create_preload_data(user_id: int, db: AsyncSession = Depends(get_db)) 
             )
             for task in task_data.get(_type).get(task_type.get(title)):
                 task["type_id"] = db_task_type.id
-                await create_task_model(
-                    CreateTaskSchema(**task), db
-                )
+                await create_task_model(CreateTaskSchema(**task), db)
 
     await create(home)
     return

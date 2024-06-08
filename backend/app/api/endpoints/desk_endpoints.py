@@ -23,32 +23,39 @@ router = APIRouter()
 
 @router.post(DeskURLS.create, status_code=status.HTTP_201_CREATED)
 async def desk_create_endpoint(
-        desk: CreateDeskSchema,
-        current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    desk: CreateDeskSchema,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> DeskSchema:
     """
     Эндпоинт на создание доски
     """
-    db_desk: Desk = await create_desk_model(user_id=current_user.id, title=desk.title, db=db)
+    db_desk: Desk = await create_desk_model(
+        user_id=current_user.id, title=desk.title, db=db
+    )
     return await get_desk_schema(db_desk)
 
 
 @router.get(DeskURLS.list, status_code=status.HTTP_200_OK)
 async def desk_list_endpoint(
-        current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ) -> typing.List[DeskSchema]:
     """
     Эндпоинт на получение списка досок по user_id
     """
-    desk_models_list = await get_desk_models_list_by_user_id(user_id=current_user.id, db=db)
+    desk_models_list = await get_desk_models_list_by_user_id(
+        user_id=current_user.id, db=db
+    )
     return desk_models_list
 
 
 @router.patch(DeskURLS.edit, status_code=status.HTTP_200_OK)
 @DeskPermissions.desk_belong_to_user
 async def desk_edit_endpoint(
-        desk_id: int, desk: CreateDeskSchema,
-        current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+    desk_id: int,
+    desk: CreateDeskSchema,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Эндпоинт для редактирования доски
@@ -60,8 +67,9 @@ async def desk_edit_endpoint(
 @router.delete(DeskURLS.delete, status_code=status.HTTP_200_OK)
 @DeskPermissions.desk_belong_to_user
 async def desk_delete_endpoint(
-        desk_id: int,
-        current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    desk_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Эндпоинт для удаления доски

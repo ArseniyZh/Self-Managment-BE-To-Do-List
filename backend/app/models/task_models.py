@@ -17,7 +17,9 @@ class Task(Base):
     __tablename__ = "task"
 
     id = Column(Integer, primary_key=True, index=True)
-    type_id = Column(Integer, ForeignKey("task_type.id", ondelete="CASCADE"), nullable=False)
+    type_id = Column(
+        Integer, ForeignKey("task_type.id", ondelete="CASCADE"), nullable=False
+    )
     title = Column(String, index=True, nullable=False)
     description = Column(String, nullable=True)
     date_to = Column(DateTime, default=datetime.utcnow)
@@ -25,7 +27,9 @@ class Task(Base):
     type = relationship("TaskType", back_populates="tasks")
 
 
-async def create_task_model(data: CreateTaskSchema, db: AsyncSession = Depends(get_db)) -> Task:
+async def create_task_model(
+    data: CreateTaskSchema, db: AsyncSession = Depends(get_db)
+) -> Task:
     db_task = Task(**data.dict())
     db.add(db_task)
     await db.commit()
@@ -34,8 +38,11 @@ async def create_task_model(data: CreateTaskSchema, db: AsyncSession = Depends(g
     return db_task
 
 
-async def get_task_models_list_by_desk_id(desk_id: int, db: AsyncSession = Depends(get_db)) -> typing.List[TaskSchema]:
+async def get_task_models_list_by_desk_id(
+    desk_id: int, db: AsyncSession = Depends(get_db)
+) -> typing.List[TaskSchema]:
     from . import TaskType
+
     db.expire_all()
 
     query = (
@@ -51,14 +58,18 @@ async def get_task_models_list_by_desk_id(desk_id: int, db: AsyncSession = Depen
     return result_list
 
 
-async def edit_task_model(task_id: int, data: EditTaskSchema, db: AsyncSession = Depends(get_db)) -> None:
+async def edit_task_model(
+    task_id: int, data: EditTaskSchema, db: AsyncSession = Depends(get_db)
+) -> None:
     db.expire_all()
     db_task = await get_task_model_by_id(task_id, db)
 
     if db_task:
         db_task.title = data.title if data.title else db_task.title
         db_task.type_id = data.type_id if data.type_id else db_task.type_id
-        db_task.description = data.description if data.description else db_task.description
+        db_task.description = (
+            data.description if data.description else db_task.description
+        )
         db_task.date_to = data.date_to if data.date_to else db_task.date_to
         await db.commit()
         await db.refresh(db_task)
@@ -73,15 +84,15 @@ async def delete_task_model(task_id: int, db: AsyncSession = Depends(get_db)) ->
     return
 
 
-async def get_task_model_by_id(task_id: int, db: AsyncSession = Depends(get_db)) -> Task:
+async def get_task_model_by_id(
+    task_id: int, db: AsyncSession = Depends(get_db)
+) -> Task:
     from . import TaskType, Desk, User
 
     query = (
         select(Task)
         .options(
-            selectinload(Task.type)
-            .selectinload(TaskType.desk)
-            .selectinload(Desk.user)
+            selectinload(Task.type).selectinload(TaskType.desk).selectinload(Desk.user)
         )
         .join(TaskType, Task.type_id == TaskType.id)
         .join(Desk, TaskType.desk_id == Desk.id)
@@ -92,15 +103,18 @@ async def get_task_model_by_id(task_id: int, db: AsyncSession = Depends(get_db))
     return (await db.execute(query)).scalar()
 
 
-async def check_belong_task_to_user(task_id: int, user_id: int, db: AsyncSession = Depends(get_db)) -> bool:
+async def check_belong_task_to_user(
+    task_id: int, user_id: int, db: AsyncSession = Depends(get_db)
+) -> bool:
     from . import TaskType, Desk
 
-    subquery = (
-        select(exists()
-               .where((Task.id == task_id) &
-                      (Task.type_id == TaskType.id) &
-                      (TaskType.desk_id == Desk.id) &
-                      (Desk.user_id == user_id)))
+    subquery = select(
+        exists().where(
+            (Task.id == task_id)
+            & (Task.type_id == TaskType.id)
+            & (TaskType.desk_id == Desk.id)
+            & (Desk.user_id == user_id)
+        )
     )
 
     return (await db.execute(subquery)).scalar()

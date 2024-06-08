@@ -24,8 +24,10 @@ router = APIRouter()
 @router.post(TaskURLS.create, status_code=status.HTTP_201_CREATED)
 @DeskPermissions.desk_belong_to_user
 async def task_create_endpoint(
-        desk_id: int, task: CreateTaskSchema,
-        current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    desk_id: int,
+    task: CreateTaskSchema,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> TaskSchema:
     """
     Эндпоинт для создания задачи
@@ -37,7 +39,9 @@ async def task_create_endpoint(
 @router.get(TaskURLS.list, status_code=status.HTTP_200_OK)
 @DeskPermissions.desk_belong_to_user
 async def task_list_endpoint(
-        desk_id: int, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    desk_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> typing.List[TaskSchema]:
     """
     Эндпоинт для списка задач
@@ -49,8 +53,10 @@ async def task_list_endpoint(
 @router.patch(TaskURLS.edit, status_code=status.HTTP_200_OK)
 @TaskPermissions.task_belong_to_user
 async def task_edit_endpoint(
-        task_id: int, data: EditTaskSchema,
-        current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    task_id: int,
+    data: EditTaskSchema,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Эндпоинт для редактирования задачи
@@ -62,7 +68,9 @@ async def task_edit_endpoint(
 @router.delete(TaskURLS.delete, status_code=status.HTTP_200_OK)
 @TaskPermissions.task_belong_to_user
 async def task_delete_endpoint(
-        task_id: int, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Эндпоинт для удаления задачи

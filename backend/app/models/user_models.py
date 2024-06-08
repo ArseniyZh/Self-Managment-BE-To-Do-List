@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import relationship
@@ -8,6 +8,8 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.schemas.base import Schema
 from app.schemas.user_schemas import UserSchema
+
+from app.redis.commands import send_user
 
 
 class User(Base):
@@ -20,16 +22,21 @@ class User(Base):
     desks = relationship("Desk", back_populates="user")
 
 
-async def create_user_model(username: str, password: str, db: AsyncSession = Depends(get_db)) -> User:
+async def create_user_model(
+    username: str, password: str, db: AsyncSession = Depends(get_db)
+) -> User:
     db_user = User(username=username, password=password)
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
+    await send_user(db_user)
 
     return db_user
 
 
-async def get_user_model_by_username(username: str, db: AsyncSession = Depends(get_db)) -> User:
+async def get_user_model_by_username(
+    username: str, db: AsyncSession = Depends(get_db)
+) -> User:
     query = select(User).filter(User.username == username)
     return (await db.execute(query)).scalar()
 

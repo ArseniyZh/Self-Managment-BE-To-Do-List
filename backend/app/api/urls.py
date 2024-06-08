@@ -70,5 +70,3 @@ class TaskURLS:
     # DELETE
     delete = DELETE + "{task_id}/"
     delete_url = f"{base_url}{delete}"
-
-

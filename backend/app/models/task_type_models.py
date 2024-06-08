@@ -9,7 +9,11 @@ from sqlalchemy.sql import select, delete
 from app.db.base import Base
 from app.db.session import get_db
 from app.schemas.base import Schema
-from app.schemas.task_type_schemas import CreateTaskTypeSchema, EditTaskTypeSchema, TaskTypeSchema
+from app.schemas.task_type_schemas import (
+    CreateTaskTypeSchema,
+    EditTaskTypeSchema,
+    TaskTypeSchema,
+)
 
 
 class TaskType(Base):
@@ -26,8 +30,14 @@ class TaskType(Base):
     tasks = relationship("Task", back_populates="type")
 
 
-async def create_task_type_model(data: CreateTaskTypeSchema, db: AsyncSession = Depends(get_db)) -> TaskType:
-    query = select(TaskType).filter(TaskType.desk_id == data.desk_id).order_by(-TaskType.sequence)
+async def create_task_type_model(
+    data: CreateTaskTypeSchema, db: AsyncSession = Depends(get_db)
+) -> TaskType:
+    query = (
+        select(TaskType)
+        .filter(TaskType.desk_id == data.desk_id)
+        .order_by(-TaskType.sequence)
+    )
     result = (await db.execute(query)).scalar()
 
     data.sequence = result.sequence + 1 if result else 0
@@ -41,7 +51,9 @@ async def create_task_type_model(data: CreateTaskTypeSchema, db: AsyncSession = 
 
 
 async def get_task_types_by_desk_id(
-        desk_id: int, is_show: typing.Optional[bool] = None, db: AsyncSession = Depends(get_db)
+    desk_id: int,
+    is_show: typing.Optional[bool] = None,
+    db: AsyncSession = Depends(get_db),
 ) -> typing.List[TaskTypeSchema]:
     query = select(TaskType).filter(TaskType.desk_id == desk_id)
 
@@ -50,13 +62,15 @@ async def get_task_types_by_desk_id(
 
     result = await db.execute(query.order_by(TaskType.sequence))
     db_task_types = result.fetchall()
-    result_list = [await get_task_type_schema(task_type["TaskType"]) for task_type in db_task_types]
+    result_list = [
+        await get_task_type_schema(task_type["TaskType"]) for task_type in db_task_types
+    ]
 
     return result_list
 
 
 async def edit_task_type_model(
-        task_type_id: int, data: EditTaskTypeSchema, db: AsyncSession = Depends(get_db)
+    task_type_id: int, data: EditTaskTypeSchema, db: AsyncSession = Depends(get_db)
 ) -> None:
     db_task_type = await get_task_type_model_by_id(task_type_id, db)
 
@@ -71,22 +85,23 @@ async def edit_task_type_model(
     return
 
 
-async def delete_task_type_model(task_type_id: int, db: AsyncSession = Depends(get_db)) -> None:
+async def delete_task_type_model(
+    task_type_id: int, db: AsyncSession = Depends(get_db)
+) -> None:
     query = delete(TaskType).filter(TaskType.id == task_type_id)
     await db.execute(query)
     await db.commit()
     return
 
 
-async def get_task_type_model_by_id(task_type_id: int, db: AsyncSession = Depends(get_db)) -> TaskType:
+async def get_task_type_model_by_id(
+    task_type_id: int, db: AsyncSession = Depends(get_db)
+) -> TaskType:
     from . import Desk, User
 
     query = (
         select(TaskType)
-        .options(
-            selectinload(TaskType.desk)
-            .selectinload(Desk.user)
-        )
+        .options(selectinload(TaskType.desk).selectinload(Desk.user))
         .join(Desk, TaskType.desk_id == Desk.id)
         .join(User, Desk.user_id == User.id)
         .filter(TaskType.id == task_type_id)
@@ -95,13 +110,17 @@ async def get_task_type_model_by_id(task_type_id: int, db: AsyncSession = Depend
     return (await db.execute(query)).scalar()
 
 
-async def check_belong_task_type_to_user(task_type_id: int, user_id: int, db: AsyncSession = Depends(get_db)) -> bool:
+async def check_belong_task_type_to_user(
+    task_type_id: int, user_id: int, db: AsyncSession = Depends(get_db)
+) -> bool:
     from . import Desk
-    subquery = (
-        select(exists()
-               .where((TaskType.id == task_type_id) &
-                      (TaskType.desk_id == Desk.id) &
-                      (Desk.user_id == user_id)))
+
+    subquery = select(
+        exists().where(
+            (TaskType.id == task_type_id)
+            & (TaskType.desk_id == Desk.id)
+            & (Desk.user_id == user_id)
+        )
     )
 
     return (await db.execute(subquery)).scalar()
